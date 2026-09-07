@@ -12,6 +12,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.Block;
 import org.slf4j.Logger;
@@ -26,6 +27,8 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.rmi.registry.Registry;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.Random;
 
@@ -37,7 +40,8 @@ public class Main implements ModInitializer {
 	public int current = 0;
 	public boolean patienceIsJustSad = true;
 	public int timePassed = 0;
-	String answer = "";
+	public List<String> mutationHistory = new ArrayList<>();
+ 	String answer = "";
 	@Override
 	public void onInitialize() {
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
@@ -70,14 +74,16 @@ public class Main implements ModInitializer {
 			return 1;
 		}
 
+		String historyText = String.join(", ", mutationHistory);
+		//sob
 		String jsonSonion = String.format("""
-				    {
-				      "model": "qwen/qwen3-14b",
-				      "messages": [
-				        {"role": "user", "content": "You are the master, controlling this minecraft world, every 60 seconds, a new scenario is formed for the player to survive, and you create them, as the player keeps living, until the last time he dies, make the traps harder and harder, the player has survived for %d ticks, if the tick counter is close to zero, the player has recently died, as this counter goes higher and higher, make each trap more difficult to survive.  You may ONLY choose blocks from this list: minecraft:lava, minecraft:fire, minecraft:soul_fire, minecraft:magma_block, minecraft:cactus, minecraft:sweet_berry_bush, minecraft:wither_rose, minecraft:powder_snow, minecraft:campfire, minecraft:soul_campfire, minecraft:sand, minecraft:red_sand, minecraft:gravel, minecraft:anvil, minecraft:pointed_dripstone, minecraft:obsidian, minecraft:netherrack, minecraft:stone, minecraft:cobblestone, minecraft:deepslate, minecraft:water, minecraft:air. Respond with ONLY the following three lines, nothing else, no explanation, no extra text: BLOCK_FROM:minecraft:<block> BLOCK_TO:minecraft:<block> PATTERN:<replace_all|checkerboard|random_scatter>"}
-				      ]
-				    }
-				""", timePassed);
+		    {
+		      "model": "qwen/qwen3-14b",
+		      "messages": [
+		        {"role": "user", "content": "You are the master, controlling this minecraft world, every 60 seconds, a new scenario is formed for the player to survive, and you create them, as the player keeps living, until the last time he dies, make the traps harder and harder, the player has survived for %d ticks, if the tick counter is close to zero, the player has recently died, as this counter goes higher and higher, make each trap more difficult to survive. Here are the last few mutations you made: %s. Do not repeat the same PATTERN or BLOCK_TO as the most recent one — vary your choices. You may ONLY choose blocks from this list: minecraft:lava, minecraft:fire, minecraft:soul_fire, minecraft:magma_block, minecraft:cactus, minecraft:sweet_berry_bush, minecraft:wither_rose, minecraft:powder_snow, minecraft:campfire, minecraft:soul_campfire, minecraft:sand, minecraft:red_sand, minecraft:gravel, minecraft:anvil, minecraft:pointed_dripstone, minecraft:obsidian, minecraft:netherrack, minecraft:stone, minecraft:cobblestone, minecraft:deepslate, minecraft:water, minecraft:air. Respond with ONLY the following three lines, nothing else, no explanation, no extra text: BLOCK_FROM:minecraft:<block> BLOCK_TO:minecraft:<block> PATTERN:<replace_all|checkerboard|random_scatter>"}
+		      ]
+		    }
+		""", timePassed, historyText);
 		HttpClient magicalCurlTypaThing = newHttpClient();
 		HttpRequest plsgivemearesponse = HttpRequest.newBuilder()
 				.uri(URI.create("https://ai.hackclub.com/proxy/v1/chat/completions"))
@@ -208,7 +214,10 @@ public class Main implements ModInitializer {
 
 
 
-
+		mutationHistory.add(content);
+		if (mutationHistory.size() > 5) {
+			mutationHistory.remove(0);
+		}
 		patienceIsJustSad = true;
 		current = 0;
 		return 0;
