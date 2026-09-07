@@ -169,6 +169,33 @@ public class Main implements ModInitializer {
 
 
 
+
+		for (ServerPlayer player:  server.getPlayerList().getPlayers()){
+			Random bruh = new Random();
+			int max = 31;
+			int min = 5;
+			int radius = bruh.nextInt((max-min)+1)+min;
+			BlockPos playerpos =  player.blockPosition();
+			int y = playerpos.getY();
+
+			int diameter = radius+radius;
+
+			for (int i = playerpos.getX()-radius; i<=radius+playerpos.getX(); i++){
+				for (int j = playerpos.getZ()-radius; j<=radius+playerpos.getZ(); j++){
+
+				}
+			}
+
+		}
+
+
+
+
+
+
+
+
+
 		patienceIsJustSad = true;
 		current = 0;
 		return 0;
