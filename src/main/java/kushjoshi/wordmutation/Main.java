@@ -11,6 +11,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.level.block.Block;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -158,8 +159,8 @@ public class Main implements ModInitializer {
 			return 1;
 		}
 
-		Holder.Reference<BLOCK> referencefromblock = BuiltInRegistries.BLOCK.get(fromblock).get();
-		Holder.Reference<BLOCK> referencetoblock = BuiltInRegistries.BLOCK.get(toblock).get();
+		Holder.Reference<Block> referencefromblock = BuiltInRegistries.BLOCK.get(fromblock).get();
+		Holder.Reference<Block> referencetoblock = BuiltInRegistries.BLOCK.get(toblock).get();
 
 
 
