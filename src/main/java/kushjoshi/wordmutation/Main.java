@@ -15,6 +15,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,7 +81,7 @@ public class Main implements ModInitializer {
 		    {
 		      "model": "qwen/qwen3-14b",
 		      "messages": [
-		        {"role": "user", "content": "You are the master, controlling this minecraft world, every 60 seconds, a new scenario is formed for the player to survive, and you create them, as the player keeps living, until the last time he dies, make the traps harder and harder, the player has survived for %d ticks, if the tick counter is close to zero, the player has recently died, as this counter goes higher and higher, make each trap more difficult to survive. Here are the last few mutations you made: %s. Do not repeat the same PATTERN or BLOCK_TO as the most recent one — vary your choices. You may ONLY choose blocks from this list: minecraft:lava, minecraft:fire, minecraft:soul_fire, minecraft:magma_block, minecraft:cactus, minecraft:sweet_berry_bush, minecraft:wither_rose, minecraft:powder_snow, minecraft:campfire, minecraft:soul_campfire, minecraft:sand, minecraft:red_sand, minecraft:gravel, minecraft:anvil, minecraft:pointed_dripstone, minecraft:obsidian, minecraft:netherrack, minecraft:stone, minecraft:cobblestone, minecraft:deepslate, minecraft:water, minecraft:air. Respond with ONLY the following three lines, nothing else, no explanation, no extra text: BLOCK_FROM:minecraft:<block> BLOCK_TO:minecraft:<block> PATTERN:<replace_all|checkerboard|random_scatter>"}
+		        {"role": "user", "content": "You are the master, controlling this minecraft world, every 60 seconds, a new scenario is formed for the player to survive, and you create them, as the player keeps living, until the last time he dies, make the traps harder and harder, the player has survived for %d ticks, if the tick counter is close to zero, the player has recently died, as this counter goes higher and higher, make each trap more difficult to survive. The mutation applies to solid, non-air blocks starting 3 blocks below the player and extending up to 15 blocks above them. Here are the last few mutations you made: %s. Do not repeat the same PATTERN or BLOCK_TO as the most recent one — vary your choices. BLOCK_FROM may be any block from this list: minecraft:lava, minecraft:fire, minecraft:soul_fire, minecraft:magma_block, minecraft:cactus, minecraft:sweet_berry_bush, minecraft:wither_rose, minecraft:powder_snow, minecraft:campfire, minecraft:soul_campfire, minecraft:sand, minecraft:red_sand, minecraft:gravel, minecraft:anvil, minecraft:pointed_dripstone, minecraft:obsidian, minecraft:netherrack, minecraft:stone, minecraft:cobblestone, minecraft:deepslate, minecraft:water, minecraft:air. BLOCK_TO must be a solid, self-supporting block that can be placed anywhere without breaking — choose ONLY from this narrower list: minecraft:lava, minecraft:water, minecraft:fire, minecraft:soul_fire, minecraft:magma_block, minecraft:cactus, minecraft:powder_snow, minecraft:sand, minecraft:red_sand, minecraft:gravel, minecraft:anvil, minecraft:obsidian, minecraft:netherrack, minecraft:stone, minecraft:cobblestone, minecraft:deepslate, minecraft:air. Respond with ONLY the following three lines, nothing else, no explanation, no extra text: BLOCK_FROM:minecraft:<block> BLOCK_TO:minecraft:<block> PATTERN:<replace_all|checkerboard|random_scatter>"}
 		      ]
 		    }
 		""", timePassed, historyText);
@@ -181,7 +182,7 @@ public class Main implements ModInitializer {
 
 		for (ServerPlayer player:  server.getPlayerList().getPlayers()){
 			Random bruh = new Random();
-			int max = 31;
+			int max = 15;
 			int min = 5;
 			int radius = bruh.nextInt((max-min)+1)+min;
 			BlockPos playerpos =  player.blockPosition();
@@ -197,11 +198,17 @@ public class Main implements ModInitializer {
 						if (cringeblockthing > radiussquare) {
 							continue;
 						}
-						BlockPos mutpos = new BlockPos(i, y, j);
 
-						server.execute(() -> {
-							player.level().setBlock(mutpos, blockto.defaultBlockState(), 3);
-						});
+						for (int k = y - 3; k <= y + 15; k++) {
+							BlockPos notamutpos = new BlockPos(i,k,j);
+							BlockState state =  player.level().getBlockState(notamutpos);
+							if (state.isAir()){
+								continue;
+							}
+							server.execute(() -> {
+								player.level().setBlock(notamutpos, blockto.defaultBlockState(), 3);
+							});
+						}
 				}
 			}
 
