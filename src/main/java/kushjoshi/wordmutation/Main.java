@@ -164,6 +164,8 @@ public class Main implements ModInitializer {
 
 
 
+		Block blockfrom =  referencefromblock.value();
+		Block blockto =  referencetoblock.value();
 
 
 
