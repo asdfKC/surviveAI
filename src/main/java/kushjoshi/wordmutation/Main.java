@@ -186,6 +186,16 @@ public class Main implements ModInitializer {
 			for (int i = playerpos.getX()-radius; i<=radius+playerpos.getX(); i++){
 				for (int j = playerpos.getZ()-radius; j<=radius+playerpos.getZ(); j++){
 
+						int cringeblockthing = ((i - playerpos.getX())*(i - playerpos.getX())) + ((j - playerpos.getZ())*(j - playerpos.getZ()));
+						int radiussquare = radius*radius;
+						if (cringeblockthing > radiussquare) {
+							continue;
+						}
+						BlockPos mutpos = new BlockPos(i, y, j);
+
+						server.execute(() -> {
+							player.level().setBlock(mutpos, blockto.defaultBlockState(), 3);
+						});
 				}
 			}
 
