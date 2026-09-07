@@ -157,6 +157,8 @@ public class Main implements ModInitializer {
 			return 1;
 		}
 
+		Holder.Reference<BLOCK> referencefromblock = BuiltInRegistries.BLOCK.get(fromblock).get();
+		Holder.Reference<BLOCK> referencetoblock = BuiltInRegistries.BLOCK.get(toblock).get();
 
 
 
