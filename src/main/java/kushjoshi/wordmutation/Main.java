@@ -130,7 +130,6 @@ public class Main implements ModInitializer {
 			answer = sobsobsob.get("content").getAsString();
 
 
-			server.getPlayerList().broadcastSystemMessage(Component.literal(answer), false);
 			parseAndApplyMutation(server, answer);
 			return 0;
 		} catch (Exception e) {
