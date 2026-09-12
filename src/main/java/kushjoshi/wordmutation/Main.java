@@ -95,7 +95,7 @@ public class Main implements ModInitializer {
 		""", timePassed, historyText);
 		HttpClient magicalCurlTypaThing = newHttpClient();
 		HttpRequest plsgivemearesponse = HttpRequest.newBuilder()
-				.uri(URI.create("https://ai.hackclub.com/proxy/v1/chat/completions"))
+				.uri(URI.create("YOUR_API_KEY_GOES_HERE"))
 				.header("Authorization", "Bearer " + apiKey)
 				.header("Content-Type", "application/json")
 				.POST(HttpRequest.BodyPublishers.ofString(jsonSonion))
