@@ -23,5 +23,9 @@ There's only one thing you need to make sure of: you MUST put your API key in a 
 ```
 key=ourkeyhere
 ```
+
+### SUPPORTED APIs
+## CURRENTLY WORKING ON ADDING MORE API FUNCTIONALITY
+
 You can get a free API key from https://ai.hackclub.com/dashboard.
 BTW HACKAI is only for people verified in hackclub's ecosystem (https://identity.hackclub.com)
