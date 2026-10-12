@@ -74,12 +74,38 @@ public class Main implements ModInitializer {
 		} catch (IOException e) {
 			log.error("Logs: Failed to open secrets.properties. Please check if file exists.");
 			server.getPlayerList().broadcastSystemMessage(Component.literal("Logs: Failed to open secrets.properties. Please check if file exists."), true);
+			patienceIsJustSad = true;
+			current = 0;
+			return 1;
+
+		}
+
+		String modelname = "qwen/qwen3-30b-a3b";
+		String apiurl = "https://ai.hackclub.com/proxy/v1/chat/completions";
+		String apiKey = props.getProperty("key");
+		String provider = props.getProperty("provider", "hackclub").trim().toLowerCase();
+		if (provider.equals("hackclub")){
+			apiurl = "https://ai.hackclub.com/proxy/v1/chat/completions";
+		}
+		else if (provider.equals("openrouter")) {
+			apiurl = "https://openrouter.ai/api/v1/chat/completions";
+		}
+		else if (provider.equals("groq")){
+			apiurl = "https://api.groq.com/openai/v1/chat/completions";
+			modelname = "qwen/qwen3.8-27b";
+		}
+		else {
+			server.getPlayerList().broadcastSystemMessage(Component.literal("Something seems to be wrong with your api endpoint, it is currently selected as " + provider + " Only Openrouter, hackclub, and Groq are allowed.") , false);
+			patienceIsJustSad = true;
+			current = 0;
 			return 1;
 		}
-		String apiKey = props.getProperty("key");
+
 		if (apiKey == null || apiKey.isBlank()) {
 			log.error("Seems to be your api key isn't properly loading. Did you remember to place it in secrets.properties?");
 			server.getPlayerList().broadcastSystemMessage(Component.literal("Seems to be your api key isn't properly loading. Did you remember to place it in secrets.properties?"), true);
+			patienceIsJustSad = true;
+			current = 0;
 			return 1;
 		}
 
@@ -87,15 +113,15 @@ public class Main implements ModInitializer {
 		//sob
 		String jsonSonion = String.format("""
 		    {
-		      "model": "qwen/qwen3-30b-a3b",
+		      "model": "%s",
 		      "messages": [
 		        {"role": "user", "content": "You are the master, controlling this minecraft world, every 60 seconds, a new scenario is formed for the player to survive, and you create them, as the player keeps living, until the last time he dies, make the traps harder and harder, the player has survived for %d ticks, if the tick counter is close to zero, the player has recently died, as this counter goes higher and higher, make each trap more difficult to survive. The mutation applies to solid, non-air blocks starting 3 blocks below the player and extending up to 15 blocks above them, and a mixture of your three chosen blocks will be randomly scattered throughout that area. Here are the last few mutations you made: %s. Do not repeat the same three blocks as the most recent mutation — vary your choices. Each block must be a genuine hazard capable of damaging the player — choose ONLY from this list: minecraft:lava, minecraft:fire, minecraft:magma_block, minecraft:powder_snow, minecraft:sand, minecraft:red_sand, minecraft:gravel, minecraft:anvil, minecraft:sweet_berry_bush, minecraft:wither_rose, minecraft:pointed_dripstone, minecraft:campfire, minecraft:soul_campfire, minecraft:tnt. Respond with EXACTLY one single line of plain text and nothing else. Do NOT use line breaks, newlines, markdown, bullet points, numbering, or any explanation before or after. The entire response must be exactly this format, all on one line, separated by single spaces: BLOCK_1:minecraft:<block> BLOCK_2:minecraft:<block> BLOCK_3:minecraft:<block>"}
 		      ]
 		    }
-		""", timePassed, historyText);
+		""", modelname,  timePassed, historyText);
 		HttpClient magicalCurlTypaThing = newHttpClient();
 		HttpRequest plsgivemearesponse = HttpRequest.newBuilder()
-				.uri(URI.create("https://ai.hackclub.com/proxy/v1/chat/completions"))
+				.uri(URI.create(apiurl))
 				.header("Authorization", "Bearer " + apiKey)
 				.header("Content-Type", "application/json")
 				.POST(HttpRequest.BodyPublishers.ofString(jsonSonion))
